@@ -8,8 +8,11 @@ function Player() {
 	this.bitmap.x = (stage.canvas.width - playerBounds.width) / 2;
 	this.bitmap.y = (stage.canvas.height - playerBounds.height) / 2;
 	
+	// Set up the alternative hit detection system.
+	this.hitRadius = 12.5;
+	
 	// Set up the variables.
-	this.HP = 100;
+	this.HP = 200;
 	this.maxHP = 200;
 	this.PP = 100;
 	this.maxPP = 200;
@@ -26,6 +29,7 @@ function SmallPlayerBullet(x, y) {
 	this.bitmap.y = y;
 	
 	this.attack = 1;
+	this.hitRadius = 10;
 	
 	this.update = function() {
 		this.bitmap.x += 20;
@@ -41,7 +45,8 @@ function HadokenPlayerBullet(x, y) {
 	this.bitmap.x = x;
 	this.bitmap.y = y;
 	
-	this.attack = 10;
+	this.attack = 5;
+	this.hitRadius = 50;
 	
 	this.update = function() {
 		this.bitmap.x += 20;
@@ -60,6 +65,7 @@ function FlowerPlayerBullet(x, y, TrajX, TrajY) {
 	this.TrajY = TrajY;
 	
 	this.attack = 1;
+	this.hitRadius = 5;
 	
 	this.update = function() {
 		this.bitmap.x += this.TrajX;
@@ -82,6 +88,8 @@ function Level() {
 	
 	// Set up the sound instance.
 	this.backgroundMusic = null;
+	
+	this.firing = false;
 
 	// Set up the layers.
 	this.backgroundLayer = new createjs.Container();
@@ -173,16 +181,16 @@ function Level() {
 		curScene.paused = true;
 		curScene.pauseLayer.alpha = 1;
 		
-		if (curScene.backgroundMusic != null)
-			curScene.backgroundMusic.pause();
+		if (curBackgroundMusic != null)
+			curBackgroundMusic.pause();
 	});
 	
 		// Create the unpause function.
 	this.pauseLayer.addEventListener("click", function() {
 		curScene.paused = false;
 		curScene.pauseLayer.alpha = 0;
-		if (curScene.backgroundMusic != null)
-			curScene.backgroundMusic.resume();
+		if (curBackgroundMusic != null)
+			curBackgroundMusic.resume();
 	});
 	
 	this.UILayer.addChild(this.PPText);
@@ -193,14 +201,17 @@ function Level() {
 	this.UILayer.addChild(this.flowerIcon);
 	this.UILayer.addChild(this.pauseIcon);
 	
-
-	
 	// Set up the player's character controls. ///////////////////////////////
 	this.player.bitmap.addEventListener("pressmove", function(e) {
 		var playerBounds = curScene.player.bitmap.getBounds();
 	
 		e.target.x = e.stageX - playerBounds.width / 2;
 		e.target.y = e.stageY - playerBounds.height / 2;
+		
+		curScene.firing = true;
+	});
+	this.player.bitmap.addEventListener("pressup", function(e) {
+		curScene.firing = false;
 	});
 	
 	// Set up the bullets and enemies. /////////////////////////////////////////////
@@ -233,8 +244,9 @@ function Level() {
 				this.afterLevel();
 		}
 		
+		if (this.firing) {
 		// Update the firing.
-		switch(this.player.mode) {
+			switch(this.player.mode) {
 			case "default":
 				this.modeDefaultCounter++;
 				
@@ -299,6 +311,7 @@ function Level() {
 					}
 				}
 				break;
+			}
 		}
 		
 		// Update the enemies.
@@ -307,19 +320,31 @@ function Level() {
 		while (i < this.enemies.length) {
 			this.enemies[i].update();
 			if (this.player.invincibleFrameCounter == 0) {
-				if (ndgmr.checkPixelCollision(this.enemies[i].bitmap,
-						this.player.bitmap)) {
-					this.player.HP -= this.enemies[i].attack;
-					createjs.Sound.play("player_hit");
+				if (this.enemies[i].hitRadius > 0) {
+					var enemyBound = this.enemies[i].bitmap.getBounds();
+					var playerBound = this.player.bitmap.getBounds();
 					
-					if (this.player.HP <= 0) {
-						this = new GameOverScene();
-					} else if (this.player.HP > this.player.maxHP) {
-						this.player.HP = thisplayer.maxHP;
+					var xDiff = Math.abs((this.player.bitmap.x + playerBound.width / 2) - (this.enemies[i].bitmap.x + enemyBound.width / 2));
+					var yDiff = Math.abs((this.player.bitmap.y + playerBound.height / 2) - (this.enemies[i].bitmap.y + enemyBound.height / 2));
+					
+					var len = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+					
+					if (len < this.enemies[i].hitRadius + this.player.hitRadius) {
+						this.player.HP -= this.enemies[i].attack;
+						createjs.Sound.play("player_hit");
+						
+						this.player.invincibleFrameCounter = this.player.invincibleFrame;
+						this.player.bitmap.alpha = 0.5;
 					}
 					
-					this.player.invincibleFrameCounter = this.player.invincibleFrame;
-					this.player.bitmap.alpha = 0.5;
+				} else {
+					if (ndgmr.checkPixelCollision(this.enemies[i].bitmap, this.player.bitmap)) {
+						this.player.HP -= this.enemies[i].attack;
+						createjs.Sound.play("player_hit");
+						
+						this.player.invincibleFrameCounter = this.player.invincibleFrame;
+						this.player.bitmap.alpha = 0.5;
+					}
 				}
 			}
 			
@@ -329,6 +354,12 @@ function Level() {
 				i--;
 			}
 			i++;
+		}
+		
+		if (this.player.HP <= 0) {
+			this = new GameOverScene();
+		} else if (this.player.HP > this.player.maxHP) {
+			this.player.HP = thisplayer.maxHP;
 		}
 		
 		// Update the player's invincibility period.
@@ -347,20 +378,45 @@ function Level() {
 			
 			var j = 0;
 			while (j < this.enemies.length) {
-				if (ndgmr.checkPixelCollision(this.enemies[j].bitmap,
-					this.playerBullets[i].bitmap)) {
-					this.enemies[j].HP -= this.playerBullets[j].attack;
+				if (this.playerBullets[i].hitRadius > 0 && this.enemies[j].hitRadius > 0) {
+					var enemyBound = this.enemies[j].bitmap.getBounds();
+					var playerBulletBound = this.playerBullets[i].bitmap.getBounds();
 					
-					this.playerBulletsLayer.removeChildAt(i);
-					this.playerBullets.splice(i, 1);
-					createjs.Sound.play("enemy_hit", createjs.Sound.INTERRUPT_ANY);
+					var xDiff = Math.abs((this.playerBullets[i].bitmap.x + playerBulletBound.width / 2) - (this.enemies[j].bitmap.x + enemyBound.width / 2));
+					var yDiff = Math.abs((this.playerBullets[i].bitmap.y + playerBulletBound.height / 2) - (this.enemies[j].bitmap.y + enemyBound.height / 2));
 					
-					if (this.enemies[j].HP <= 0) {
-						this.enemyLayer.removeChildAt(j);
-						this.enemies.splice(j, 1);
+					var len = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+					
+					if (len < this.enemies[j].hitRadius + this.playerBullets[i].hitRadius) {
+						this.enemies[j].HP -= this.playerBullets[i].attack;
+						
+						this.playerBulletsLayer.removeChildAt(i);
+						this.playerBullets.splice(i, 1);
+						createjs.Sound.play("enemy_hit", createjs.Sound.INTERRUPT_ANY);
+						
+						if (this.enemies[j].HP <= 0) {
+							this.enemyLayer.removeChildAt(j);
+							this.enemies.splice(j, 1);
+						}
+						i--;
+						break;
 					}
-					i--;
-					break;
+				} else {
+					if (ndgmr.checkPixelCollision(this.enemies[j].bitmap,
+						this.playerBullets[i].bitmap)) {
+						this.enemies[j].HP -= this.playerBullets[i].attack;
+						
+						this.playerBulletsLayer.removeChildAt(i);
+						this.playerBullets.splice(i, 1);
+						createjs.Sound.play("enemy_hit", createjs.Sound.INTERRUPT_ANY);
+						
+						if (this.enemies[j].HP <= 0) {
+							this.enemyLayer.removeChildAt(j);
+							this.enemies.splice(j, 1);
+						}
+						i--;
+						break;
+					}
 				}
 				j++;
 			}
@@ -424,24 +480,28 @@ function TestLevel() {
 	Level.call(this);
 	
 	this.backgroundLayer.addChild(new createjs.Bitmap("img/debug_bg.png"));
+
 	this.waves.push(function() {
+		curBackgroundMusic = createjs.Sound.play("stage", {loop:-1});
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 100, 300));
+		curScene.addEnemy(new Brofish(stage.canvas.width + 50, 200));
+	});
+	this.waves.push(function() {
+		curScene.addEnemy(new Jelly(stage.canvas.width + 200, 400));
+	});
+	this.waves.push(function() {
+		curScene.addEnemy(new ActionJelly(stage.canvas.width + 100, 100));
+		curScene.addEnemy(new Catfish(stage.canvas.width + 50, 300));
+	});
+	this.waves.push(function() {
+		curBackgroundMusic.stop();
 		curBackgroundMusic = createjs.Sound.play("boss", {loop:-1});
-		curScene.addEnemy(new Enemy());
+		curScene.addEnemy(new Prescott());
 	});
 	this.waves.push(function() {
-		curScene.addEnemy(new Enemy());
-	});
-	this.waves.push(function() {
-		curScene.addEnemy(new Enemy());
-	});
-	this.waves.push(function() {
-		curScene.addEnemy(new Enemy());
-	});
-	this.waves.push(function() {
-		curScene.addEnemy(new Enemy());
-	});
-	this.waves.push(function() {
-		createjs.Sound.stop();
+		curBackgroundMusic.stop();
 	});
 }
 TestLevel.prototype = Object.create(Level);
+
+// Create your level here! /////////////////////////////////////////////

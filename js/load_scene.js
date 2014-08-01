@@ -35,12 +35,24 @@ function Loader() {
 		
 		// Enemy textures here:
 		{id:"dummy_enemy", src:"img/dummy_enemy.png"},
+		{id:"brofish", src:"img/brofish.png"},
+		{id:"catfish", src:"img/catfish.png"},
+		{id:"action_fish", src:"img/action_fish.png"},
+		{id:"horizontal_bullet", src:"img/horizontal_bullet.png"},
+		{id:"vertical_bullet", src:"img/vertical_bullet.png"},
+		{id:"jelly", src:"img/jelly.png"},
+		{id:"action_jelly", src:"img/action_jelly.png"},
+		{id:"enemy_hadoken", src:"img/enemy_hadoken.png"},
+		{id:"prescott", src:"img/prescott.png"},
 		
 		// Sound effects here:
 		{id:"enemy_hit", src:"snd/enemy_hit.m4a", data:1},
 		{id:"player_hit", src:"snd/player_hit.m4a", data:1},
 		{id:"player_healed", src:"snd/player_healed.m4a", data:1},
-		{id:"boss", src:"snd/boss.m4a", data:1}
+		
+		// Load music here:
+		{id:"boss", src:"snd/boss.m4a", data:1},
+		{id:"stage", src:"snd/stage.m4a", data:1}
 	]);
 	
 	// Set up the update function.
@@ -48,9 +60,9 @@ function Loader() {
 		if (this.loadCompleted) {
 			this.loadCompleted = false;
 			res = this.queue;
-			//curScene = new TitleScene();
-			curScene = new TestCutscene();
-			curScene.updateCommands();
+			curScene = new TitleScene();
+			//curScene = new TestCutscene();
+			//curScene.updateCommands();
 		}
 	}
 }
