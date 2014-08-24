@@ -300,9 +300,9 @@ function Cutscene8() {
 	this.showConvo(res.getResult("prescott_icon"), "Prescott", "This can't be ALPHA! I've met him once before coming to Atlantis. He's a very buffy man and not a girl like you. He's so pumped you can smell steroid out from his breaths. I know it! It has something with Shiba Momoka! You were dating her... And her potion has made you girly!");
 	this.showConvo(res.getResult("alpha_icon"), "ALPHA", "Momoka? She has nothing to do with this. That wrench is dominated by me!");
 	this.showConvo(res.getResult("prescott_icon"), "Prescott", "It's the other way around. I've read the book! She's a magnificent one. She's just playing with you. You know why almost all of your ministers are either dead or no longer human? She gave them weird medicines that corrupted them. But I'm too smart for her plan so I'm still intact.");
-	this.showConvo(res.getResult("prescott_icon"), "Prescott", "And I have no sympathy for the ministers since they like to spike girls' drinks! And you were probably spiked as well! Ironic. Karmic!");
+	this.showConvo(res.getResult("prescott_icon"), "Prescott", "And I have no sympathy for the ministers since they are usually arrogant and careless. I have no sympathy for you too!");
 	this.showConvo(res.getResult("alpha_icon"), "ALPHA", "How there you smack talk to me like that! Prescott. Obey the alpha one.");
-	this.showConvo(res.getResult("prescott_icon"), "Prescott", "No longer relevant! I've just got a message; the train compay accepted me. Now, I can work on a train without having my oeuvre getting peed on. See you all, loser! Not you fish though, you are cool!");
+	this.showConvo(res.getResult("prescott_icon"), "Prescott", "No longer relevant! I've just got a message in my cell phone; the train compay accepted me. Now, I can work on a train without having my oeuvre getting peed on. See you all, loser! Not you fish though, you are cool!");
 	this.showConvo(res.getResult("alpha_icon"), "ALPHA", "I never lose. I am the alpha one! Fishy! You may have bested my ministers. But I shall best you!");
 	this.showConvo(res.getResult("hero_icon"), "Fish", "You tried to hit on a fish figuratively. Now try to hit on a fish for real!");
 	

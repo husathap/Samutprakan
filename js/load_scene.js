@@ -10,8 +10,8 @@ function Loader() {
 	
 	// Initialize the loader.
 	this.queue = new createjs.LoadQueue(false);
-	createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);
-	createjs.Sound.alternateExtensions = ["ogg"];
+	//createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);
+	createjs.Sound.alternateExtensions = ["m4a"];
 	this.queue.installPlugin(createjs.Sound);
 	this.queue.on("complete", function() {
 				//alert("It has ended!");
@@ -104,18 +104,18 @@ function Loader() {
 		{id:"vs_momoka", src:"img/vs_momoka.png"},
 		
 		// Sound effects here:
-		{id:"enemy_hit", src:"snd/enemy_hit.m4a", data:1},
-		{id:"player_hit", src:"snd/player_hit.m4a", data:1},
-		{id:"player_healed", src:"snd/player_healed.m4a", data:1},
+		{id:"enemy_hit", src:"snd/enemy_hit.ogg", data:1},
+		{id:"player_hit", src:"snd/player_hit.ogg", data:1},
+		{id:"player_healed", src:"snd/player_healed.ogg", data:1},
 		
 		// Load music here:
-		{id:"boss", src:"snd/boss.m4a", data:1},
-		{id:"stage", src:"snd/stage.m4a", data:1},
-		{id:"encounter", src:"snd/encounter.m4a", data:1},
-		{id:"go_fishing", src:"snd/go_fishing.m4a", data:1},
-		{id:"boss_alpha", src:"snd/boss_alpha.m4a", data:1},
-		{id:"te_wo_sawareru", src:"snd/te_wo_sawareru.m4a", data:1},
-		{id:"ending", src:"snd/ending.m4a", data:1}
+		{id:"boss", src:"snd/boss.ogg", data:1},
+		{id:"stage", src:"snd/stage.ogg", data:1},
+		{id:"encounter", src:"snd/encounter.ogg", data:1},
+		{id:"go_fishing", src:"snd/go_fishing.ogg", data:1},
+		{id:"boss_alpha", src:"snd/boss_alpha.ogg", data:1},
+		{id:"te_wo_sawareru", src:"snd/te_wo_sawareru.ogg", data:1},
+		{id:"ending", src:"snd/ending.ogg", data:1}
 	]);
 	
 	// Set up the update function.
