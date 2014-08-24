@@ -12,8 +12,8 @@ function Player() {
 	this.hitRadius = 12.5;
 	
 	// Set up the variables.
-	this.HP = 200;
-	this.maxHP = 200;
+	this.HP = 50;
+	this.maxHP = 50;
 	this.PP = 100;
 	this.maxPP = 200;
 	this.mode = "Default";
@@ -83,11 +83,11 @@ function FlowerPlayerBullet(x, y, TrajX, TrajY) {
 function Level() {
 	Scene.call(this);
 	
+	if (curBackgroundMusic != null)
+		curBackgroundMusic.stop();
+	
 	// Set up the waves.
 	this.waves = [];
-	
-	// Set up the sound instance.
-	this.backgroundMusic = null;
 	
 	this.firing = false;
 
@@ -185,7 +185,7 @@ function Level() {
 			curBackgroundMusic.pause();
 	});
 	
-		// Create the unpause function.
+	// Create the unpause function.
 	this.pauseLayer.addEventListener("click", function() {
 		curScene.paused = false;
 		curScene.pauseLayer.alpha = 0;
@@ -356,8 +356,11 @@ function Level() {
 			i++;
 		}
 		
+		// Update the game over scene and making sure that the player's HP isn't over 100%.
 		if (this.player.HP <= 0) {
-			this = new GameOverScene();
+			if (curBackgroundMusic != null)
+				curBackgroundMusic.stop();
+			curScene = new GameOverScene();
 		} else if (this.player.HP > this.player.maxHP) {
 			this.player.HP = thisplayer.maxHP;
 		}
@@ -466,7 +469,12 @@ function Level() {
 		this.HPBar.graphics.beginFill("#008000").drawRect(50, 10, 150 * (this.player.HP / this.player.maxHP), 20);
 	};
 	
-	this.afterLevel = function() { curScene = new TitleScene() };
+	this.afterLevel = function() {
+		if (curBackgroundMusic != null) {
+			curBackgroundMusic.stop();
+		}
+		curScene = new TitleScene() 
+	};
 	
 	this.addEnemy = function(enemy) {
 		this.enemies.push(enemy);
@@ -483,15 +491,14 @@ function TestLevel() {
 
 	this.waves.push(function() {
 		curBackgroundMusic = createjs.Sound.play("stage", {loop:-1});
-		curScene.addEnemy(new ActionFish(stage.canvas.width + 100, 300));
+		curScene.addEnemy(new ScouterFish(stage.canvas.width + 100, 300));
 		curScene.addEnemy(new Brofish(stage.canvas.width + 50, 200));
 	});
 	this.waves.push(function() {
-		curScene.addEnemy(new Jelly(stage.canvas.width + 200, 400));
+		curScene.addEnemy(new Dogfish(stage.canvas.width + 200, 400));
 	});
 	this.waves.push(function() {
-		curScene.addEnemy(new ActionJelly(stage.canvas.width + 100, 100));
-		curScene.addEnemy(new Catfish(stage.canvas.width + 50, 300));
+		curScene.addEnemy(new SuperFish(stage.canvas.width + 100, 100));
 	});
 	this.waves.push(function() {
 		curBackgroundMusic.stop();
@@ -505,3 +512,348 @@ function TestLevel() {
 TestLevel.prototype = Object.create(Level);
 
 // Create your level here! /////////////////////////////////////////////
+function Level1() {
+	Level.call(this);
+	
+	var bg1 = new createjs.Bitmap(res.getResult("level1_background"));
+	bg1.x = 0;
+	var bg2 = new createjs.Bitmap(res.getResult("level1_background"));
+	bg2.x = 800;
+	
+	this.backgroundLayer.addChild(bg1);
+	this.backgroundLayer.addChild(bg2);
+	
+	this.updateMisc = function() {
+		bg1.x -= 10;
+		bg2.x -= 10;
+		
+		if (bg1.x <= -800) {
+			bg1.x = 0;
+			bg2.x = 800;
+		}
+	}
+	
+	this.waves.push(function() {
+		curBackgroundMusic = createjs.Sound.play("stage", {loop:-1});
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 100, 300));
+		curScene.addEnemy(new Brofish(stage.canvas.width + 50, 200));
+	});
+	this.waves.push(function() {
+		curScene.addEnemy(new Jelly(stage.canvas.width + 200, 400));
+	});
+	this.waves.push(function() {
+		curScene.addEnemy(new ActionJelly(stage.canvas.width + 100, 100));
+		curScene.addEnemy(new Catfish(stage.canvas.width + 50, 300));
+	});
+	this.waves.push(function() {
+		for (i = 100; i <= 250; i += 50)
+			curScene.addEnemy(new ActionJelly(stage.canvas.width + 100, i));
+
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 50, 100));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 50, 200));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 50, 400));
+		
+		for (i = 100; i <= 250; i += 50)
+			curScene.addEnemy(new ActionJelly(stage.canvas.width + 150, i));
+
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 200, 500));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 200, 100));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 200, 200));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 200, 400));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 200, 500));
+	});
+	this.waves.push(function() {
+		for (i = 0; i <= 600; i += 100)
+			curScene.addEnemy(new Catfish(stage.canvas.width + 50, i));
+
+		curScene.addEnemy(new Brofish(stage.canvas.width + 100, 300));
+		for (i = 0; i <= 600; i += 100)
+			curScene.addEnemy(new Catfish(stage.canvas.width + 150, i));
+
+		
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 350, 500));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 350, 100));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 350, 200));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 350, 400));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 350, 500));
+	});
+	this.waves.push(function() {
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 40, 100));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 40, 200));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 40, 400));
+		curScene.addEnemy(new ActionFish(stage.canvas.width + 40, 500));
+		
+		for (i = 50; i <= 250; i += 50)
+			curScene.addEnemy(new ActionJelly(stage.canvas.width + 50, 100));
+	});
+	this.waves.push(function() {
+		curBackgroundMusic.stop();
+	});
+	
+	this.afterLevel = function() { curScene = new Cutscene2(); curScene.updateCommands(); };
+}
+Level1.prototype = Object.create(Level);
+
+function Level1Boss() {
+	Level.call(this);
+	
+	this.backgroundLayer.addChild(new createjs.Bitmap(res.getResult("boss1_background")));
+	
+	this.waves.push(function() {
+		curBackgroundMusic = createjs.Sound.play("boss", {loop:-1});
+		curScene.addEnemy(new Prescott());
+	});
+};
+Level1Boss.prototype = Object.create(Level);
+
+function Level2() {
+	Level.call(this);
+	
+	var bg1 = new createjs.Bitmap(res.getResult("level2_background"));
+	bg1.x = 0;
+	var bg2 = new createjs.Bitmap(res.getResult("level2_background"));
+	bg2.x = 800;
+	
+	this.backgroundLayer.addChild(bg1);
+	this.backgroundLayer.addChild(bg2);
+	
+	this.updateMisc = function() {
+		bg1.x -= 5;
+		bg2.x -= 5;
+		
+		if (bg1.x <= -800) {
+			bg1.x = 0;
+			bg2.x = 800;
+		}
+	}
+	
+	this.waves.push(function() {
+		curBackgroundMusic = createjs.Sound.play("stage", {loop:-1});
+		curScene.addEnemy(new Dogfish(stage.canvas.width, 100));
+		curScene.addEnemy(new Dogfish(stage.canvas.width, 300));
+		curScene.addEnemy(new Dogfish(stage.canvas.width, 500));
+	});
+	this.waves.push(function() {
+		for (i = 100; i <= 500; i += 100);
+			curScene.addEnemy(new ScouterFish(stage.canvas.width, i));
+	});
+	this.waves.push(function() {
+		curScene.addEnemy(new SuperFish(stage.canvas.width, 100));
+		for (i = 200; i <= 400; i+= 100)
+			curScene.addEnemy(new ScouterFish(stage.canvas.width, i));
+		curScene.addEnemy(new SuperFish(stage.canvas.width, 500));
+	});
+	this.waves.push(function() {
+		for (i = 100; i <= 500; i += 100)
+			curScene.addEnemy(new SuperFish(stage.canvas.width, i));
+		
+		curScene.addEnemy(new ScouterFish(stage.canvas.width + 100, 0));
+		for (i = 100; i <= 500; i += 100)
+			curScene.addEnemy(new Brofish(stage.canvas.width + 100, i));
+		
+		for (i = 100; i <= 500; i += 100)
+			curScene.addEnemy(new Brofish(stage.canvas.width + 200, i));
+		curScene.addEnemy(new ScouterFish(stage.canvas.width + 200, 550));
+		
+		curScene.addEnemy(new ScouterFish(stage.canvas.width + 300, 0));
+		for (i = 100; i <= 400; i += 100)
+			curScene.addEnemy(new Brofish(stage.canvas.width + 300, i));
+		curScene.addEnemy(new Brofish(stage.canvas.width + 300, 550));
+		
+		for (i = 100; i <= 500; i += 100)
+			curScene.addEnemy(new Brofish(stage.canvas.width + 400, i));
+		curScene.addEnemy(new ScouterFish(stage.canvas.width + 400, 550));
+		
+		curScene.addEnemy(new Dogfish(stage.canvas.width + 500, 300));
+	});
+	
+	this.waves.push(function() {
+		curScene.addEnemy(new SuperFish(stage.canvas.width, 0));
+		for (i = 100; i <= 400; i += 100)
+			curScene.addEnemy(new ScouterFish(stage.canvas.width + i, 0));
+		
+		curScene.addEnemy(new SuperFish(stage.canvas.width, 500));
+		for (i = 100; i <= 400; i += 100)
+			curScene.addEnemy(new ScouterFish(stage.canvas.width + i, 500));
+	});
+	
+	this.waves.push(function() {
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width, 300));
+	});
+	
+	this.waves.push(function() {
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width, 200));
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width, 400));
+	});
+	
+	this.waves.push(function() {
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width + 100, 0));
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width + 200, 500));
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width, 300));
+	});
+	
+	this.waves.push(function() {
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width, 100));
+	});
+	
+	this.waves.push(function() {
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width, 100));
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width, 300));
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width, 500));
+	});
+	
+	this.waves.push(function() {
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width + 200, 100));
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width, 350));
+		curScene.addEnemy(new EvilCarriage(stage.canvas.width + 250, 400));
+	});
+	
+	this.waves.push(function() {
+		for (i = 100; i <= 400; i += 100)
+			curScene.addEnemy(new ScouterFish(stage.canvas.width + i, 0));
+	});
+	
+	this.waves.push(function() {
+		for (i = 100; i <= 400; i += 100)
+			curScene.addEnemy(new ScouterFish(stage.canvas.width + i, 500));
+	});
+
+	this.waves.push(function() {
+		curBackgroundMusic.stop();
+	});
+	
+	this.afterLevel = function() { curScene = new Cutscene3(); curScene.updateCommands(); };
+}
+Level2.prototype = Object.create(Level);
+
+function Level2Boss() {
+	Level.call(this);
+	
+	this.backgroundLayer.addChild(new createjs.Bitmap(res.getResult("boss2_background")));
+	
+	this.updateMisc = function() {
+		if (curScene.enemies.length > 0)
+			if (!curScene.enemies[0].hasOwnProperty("boss")) {
+				curScene.enemies = [];
+			}
+	}
+	
+	this.waves.push(function() {
+		curBackgroundMusic = createjs.Sound.play("boss", {loop:-1});
+		curScene.addEnemy(new PercyZeus());
+		curScene.enemies[0].boss = true;
+	});
+};
+Level2Boss.prototype = Object.create(Level);
+
+function Level3Boss1() {
+	Level.call(this);
+	
+	this.backgroundLayer.addChild(new createjs.Bitmap(res.getResult("boss3_background")));
+	this.waves.push(function() {
+		curBackgroundMusic = createjs.Sound.play("boss", {loop:-1});
+		curScene.addEnemy(new ChrisR());
+	});
+	
+	this.afterLevel = function() { curScene = new Cutscene5(); curScene.updateCommands(); };
+};
+Level3Boss1.prototype = Object.create(Level);
+
+function Level3Boss2() {
+	Level.call(this);
+	
+	this.backgroundLayer.addChild(new createjs.Bitmap(res.getResult("boss4_background")));
+	this.waves.push(function() {
+		curBackgroundMusic = createjs.Sound.play("boss", {loop:-1});
+		curScene.addEnemy(new Johny());
+	});
+	
+	this.afterLevel = function() { curScene = new Cutscene6(); curScene.updateCommands(); };
+};
+Level3Boss2.prototype = Object.create(Level);
+
+function Level3Boss3() {
+	Level.call(this);
+	
+	this.backgroundLayer.addChild(new createjs.Bitmap(res.getResult("boss5_background")));
+	this.waves.push(function() {
+		curBackgroundMusic = createjs.Sound.play("boss", {loop:-1});
+		curScene.addEnemy(new Danielle());
+	});
+	
+	this.afterLevel = function() { curScene = new Cutscene7(); curScene.updateCommands(); };
+};
+Level3Boss3.prototype = Object.create(Level);
+
+function Level3Boss4() {
+	Level.call(this);
+	
+	this.backgroundLayer.addChild(new createjs.Bitmap(res.getResult("boss6_background")));
+	this.waves.push(function() {
+		curBackgroundMusic = createjs.Sound.play("boss", {loop:-1});
+		curScene.addEnemy(new Mark());
+	});
+};
+Level3Boss4.prototype = Object.create(Level);
+
+function Level4Boss1() {
+	Level.call(this);
+	
+	this.backgroundLayer.addChild(new createjs.Bitmap(res.getResult("boss7_background")));
+	this.waves.push(function() {
+		curBackgroundMusic = createjs.Sound.play("boss_alpha", {loop:-1});
+		curScene.addEnemy(new ALPHA());
+	});
+	
+	this.afterLevel = function () { curScene = new Cutscene9(); curScene.updateCommands(); };
+};
+Level4Boss1.prototype = Object.create(Level);
+
+function Level4() {
+	Level.call(this);
+	
+	this.backgroundLayer.addChild(new createjs.Bitmap(res.getResult("level4_background")));
+	this.waves.push(function() {
+		curBackgroundMusic = createjs.Sound.play("te_wo_sawareru", {loop:-1});
+		for (x = 0; x < 600; x += 150) {
+			for (y = 0; y < 1000; y += 150)
+				curScene.addEnemy(new ScouterFish(stage.canvas.width + x, y));
+		}
+	});
+	this.waves.push(function() {
+		for (x = 0; x < 600; x += 150) {
+			for (y = 0; y < 1000; y += 150)
+				curScene.addEnemy(new ScouterFish(stage.canvas.width + x, y));
+		}
+	});
+	this.waves.push(function() {
+		for (x = 0; x < 600; x += 150) {
+			for (y = 0; y < 1000; y += 150)
+				curScene.addEnemy(new ScouterFish(stage.canvas.width + x, y));
+		}
+	});
+	
+	this.waves.push(function() {
+		for (i = 0; i < 600; i += 100)
+			curScene.addEnemy(new SuperFish(stage.canvas.width, i));
+		for (i = 0; i < 600; i += 100)
+			curScene.addEnemy(new SuperFish(stage.canvas.width + 200, i));
+		for (i = 0; i < 600; i += 100)
+			curScene.addEnemy(new SuperFish(stage.canvas.width + 300, i));
+		for (i = 0; i < 600; i += 100)
+			curScene.addEnemy(new SuperFish(stage.canvas.width + 400, i));
+	});
+
+	
+	this.waves.push(function() {
+		for (i = 0; i < 600; i += 100)
+			curScene.addEnemy(new ActionJelly(stage.canvas.width + i, 0));
+	});
+	
+	this.waves.push(function() {
+		curScene.addEnemy(new Momoka());
+	});
+	
+	this.afterLevel = function() { curScene = new Cutscene10(); curScene.updateCommands(); };
+}
+Level4.prototype = Object.create(Level);
